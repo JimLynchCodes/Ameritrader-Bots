@@ -1,0 +1,19 @@
+{
+  "name": "get-quotes",
+  "version": "1.0.0",
+  "description": "gets quotes",
+  "main": "index.js",
+  "scripts": {
+    "start": "node get-quotes.js GOOG",
+    "test": "jest"
+  },
+  "author": "James",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
+    "jest": "^25.1.0"
+  }
+}
