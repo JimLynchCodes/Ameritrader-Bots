@@ -1,0 +1,11 @@
+{
+  "name": "get-quotes",
+  "version": "1.0.0",
+  "description": "gets quotes",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "James",
+  "license": "GPL-3.0"
+}
