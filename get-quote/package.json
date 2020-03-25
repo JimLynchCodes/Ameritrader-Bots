@@ -4,7 +4,7 @@
   "description": "gets quotes",
   "main": "index.js",
   "scripts": {
-    "start": "node get-quotes.js GOOG",
+    "start": "node get-quote.js GOOG",
     "test": "jest"
   },
   "author": "James",
