@@ -1,0 +1,16 @@
+{
+  "name": "twitter-keyword-scanner",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./index.js",
+    "test": "jest"
+  },
+  "author": "Jim",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "mongodb": "^3.5.5"
+  }
+}
