@@ -1,12 +1,12 @@
 const MongoClient = require('mongodb').MongoClient;
 const moment = require('moment')
 
-const getKeywords = (uri) => {
-    console.log('uri is: ', uri)
+const getKeywords = () => {
+    console.log('uri is: ', process.env.MONGO_URI)
 
     return new Promise((resolve, reject) => {
 
-        MongoClient.connect(uri, function (err, db) {
+        MongoClient.connect(process.env.MONGO_URI, (err, db) => {
             if (err) throw err
 
             console.log('connected to mongo for reading keywords..')
@@ -24,12 +24,12 @@ const getKeywords = (uri) => {
     })
 }
 
-const save = (uri, tweetsFound) => {
+const save = (tweetsFound) => {
 
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
 
-        MongoClient.connect(uri, function (err, db) {
-            
+        MongoClient.connect(process.env.MONGO_URI, (err, db) => {
+
             if (err)
                 throw new Error(err)
 
@@ -39,18 +39,19 @@ const save = (uri, tweetsFound) => {
 
             const currentTime = moment().format('MMMM Do YYYY, h:mm:ss a')
 
-            const result = dbo.collection('twitter-keyword-scanner-results').insertOne({
+            dbo.collection('twitter-keyword-scanner-results').insertOne({
                 date_scraped: currentTime,
                 tweets_by_keyword: tweetsFound
             }, (err, res) => {
                 if (err) throw err
                 db.close()
-                resolve(result)
+                resolve(res.result)
             })
 
         })
 
     })
+
 }
 
 module.exports = {

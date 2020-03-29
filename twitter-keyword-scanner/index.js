@@ -10,7 +10,7 @@ const getTweets = twitFunctions.getTweets
 
 const main = async () => {
 
-    const keywords = await getKeywords(process.env.MONGO_URI)
+    const keywords = await getKeywords()
 
     await initializeTwitter()
 
@@ -18,17 +18,16 @@ const main = async () => {
         return getTweets(keywordObject.keyword, keywordObject.exact_match)
     })
 
-    Promise.all(tweetCallPromises).then(async (resolvedPromises) => {
+    const resolvedPromises = await Promise.all(tweetCallPromises)
 
-        const tweetsFound = keywords.map((keywordObject, i) => {
-            keywordObject.tweets_found = resolvedPromises[i]
-            return keywordObject
-        })
+    const tweetsFound = keywords.map((keywordObject, i) => {
+        keywordObject.tweets_found = resolvedPromises[i]
+        return keywordObject
+    })
 
-        const saved = await save(process.env.MONGO_URI, tweetsFound)
+    await save(tweetsFound)
 
-        console.log('Tweets saved! ', saved)
-    });
+    console.log('Tweets saved! ')
 
 }
 
