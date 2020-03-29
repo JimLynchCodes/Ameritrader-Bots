@@ -1,6 +1,7 @@
-var MongoClient = require('mongodb').MongoClient;
+const MongoClient = require('mongodb').MongoClient;
+const moment = require('moment')
 
-const getKeywords = async (uri) => {
+const getKeywords = (uri) => {
     console.log('uri is: ', uri)
 
     return new Promise((resolve, reject) => {
@@ -8,15 +9,14 @@ const getKeywords = async (uri) => {
         MongoClient.connect(uri, function (err, db) {
             if (err) throw err
 
-            console.log('connected...')
+            console.log('connected to mongo for reading keywords..')
 
             var dbo = db.db("eon-data")
 
-            dbo.collection("twitter-keyword-scanner").find({}).toArray(function (err, mainDoc) {
+            dbo.collection("twitter-keyword-scanner-config").findOne({}, (err, mainDoc) => {
                 if (err) throw err
 
-                const keywords = mainDoc[0].config.keywordsToLookFor
-                console.log('got keywords. ', keywords)
+                const keywords = mainDoc.keywords
                 db.close()
                 resolve(keywords)
             })
@@ -24,22 +24,32 @@ const getKeywords = async (uri) => {
     })
 }
 
-const save = (uri, data) => {
-    return new Promise( (resolve, reject) => {
+const save = (uri, tweetsFound) => {
+
+    return new Promise((resolve, reject) => {
 
         MongoClient.connect(uri, function (err, db) {
-            if (err) throw err
             
-            console.log('connected...')
-            
+            if (err)
+                throw new Error(err)
+
+            console.log('connected to mongo for saving results...')
+
             var dbo = db.db("eon-data")
-            
-            const result = dbo.collection('twitter-keyword-scanner').insert(data)
-            
-            resolve(result)
-            
+
+            const currentTime = moment().format('MMMM Do YYYY, h:mm:ss a')
+
+            const result = dbo.collection('twitter-keyword-scanner-results').insertOne({
+                date_scraped: currentTime,
+                tweets_by_keyword: tweetsFound
+            }, (err, res) => {
+                if (err) throw err
+                db.close()
+                resolve(result)
+            })
+
         })
-        
+
     })
 }
 
