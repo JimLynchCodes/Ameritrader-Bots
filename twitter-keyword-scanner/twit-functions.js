@@ -1,6 +1,6 @@
 const twit = require('twit');
 
-const MILLISECOND_IN_ONE_DAY = 48 * 3600 * 1000
+const MILLISECONDS_IN_ONE_DAY = 48 * 3600 * 1000
 
 let Twitter
 
@@ -28,12 +28,16 @@ const getTweets = async (keywords, isExactMatch) => {
         if (isExactMatch)
             query = '"' + keywords + '"'
 
-        const oneDayAgo = new Date(Date.now() - 2 * MILLISECOND_IN_ONE_DAY)
+        const ONE = 1
+
+        const oneDayAgo = new Date(Date.now() - ONE * MILLISECONDS_IN_ONE_DAY)
 
         // For twitter, query date must be in the form YYYY-MM-DD
         const oneDayAgoFormatted = oneDayAgo.getFullYear() + '-' + (oneDayAgo.getMonth() + 1) + '-' + oneDayAgo.getDate()
 
         query = query + ' since:' + oneDayAgoFormatted
+
+        query = query + ' -filter:retweets'
 
         console.log('full query: ', query)
 
