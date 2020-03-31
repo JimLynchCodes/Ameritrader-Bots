@@ -1,5 +1,6 @@
 require('dotenv').config()
 const axios = require('axios');
+var util = require('util')
 
 const getQuotesEndpoint = 'https://api.tdameritrade.com/v1/marketdata'
 
@@ -11,7 +12,7 @@ const getQuote = async () => {
 
     console.log('\n\nGetting quotes...\n\n')
 
-    console.log('key: ', process.env.key)
+    // console.log('key: ', process.env.key)
 
     try {
 
@@ -24,7 +25,8 @@ const getQuote = async () => {
             }
         )
 
-        console.log('Quote: ', response)
+        // console.log('Quote: ', JSON.stringify(response))
+        console.log('Quote: ', util.inspect(response))
 
     }
 
