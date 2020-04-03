@@ -19,40 +19,44 @@ const getIntradayData = (ticker) => {
 
             const response = await axios.get(alphaPriceHistoryEndpoint)
 
+
+            console.log('got day data ', JSON.stringify(response.data, null, 2))
+
             const timeSeriesData = response.data['Time Series (1min)']
-
+            
             const today = new Date()
-
+            
             const elevenThirtyDateString = (today.getMonth() + 1) + '/' +
-                today.getDate() + '/' +
-                today.getFullYear() +
-                ' 11:30:00 GMT-0400'
-
+            today.getDate() + '/' +
+            today.getFullYear() +
+            ' 11:30:00 GMT-0400'
+            
             const twelveFifteenDateString = (today.getMonth() + 1) + '/' +
-                today.getDate() + '/' +
-                today.getFullYear() +
-                ' 12:15:00 GMT-0400'
-
+            today.getDate() + '/' +
+            today.getFullYear() +
+            ' 12:15:00 GMT-0400'
+            
             const elevenThirtyDate = new Date(elevenThirtyDateString)
             const twelveFifteenDate = new Date(twelveFifteenDateString)
-
+            
             const lunchtimeEntries = []
-
+            
             for (let [key, value] of Object.entries(timeSeriesData)) {
-
+                
                 timeSeriesDate = new Date(key)
-
+                
                 if (timeSeriesDate >= elevenThirtyDate && timeSeriesDate <= twelveFifteenDate)
-                    lunchtimeEntries.unshift({
-                        open: value['1. open'],
-                        high: value['2. high'],
-                        low: value['3. low'],
-                        close: value['4. close'],
-                        volume: value['5. volume'],
-                        time: key
-                    })
+                lunchtimeEntries.unshift({
+                    open: value['1. open'],
+                    high: value['2. high'],
+                    low: value['3. low'],
+                    close: value['4. close'],
+                    volume: value['5. volume'],
+                    time: key
+                })
             }
-
+            
+            console.log('got data for ' + ticker + ': ' + JSON.stringify(lunchtimeEntries, null, 2))
             resolve(lunchtimeEntries)
 
         }
