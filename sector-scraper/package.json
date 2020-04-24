@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "derp": "node ./derp.js",
     "test": "jest --coverage --watch"
   },
   "author": "Jim",
