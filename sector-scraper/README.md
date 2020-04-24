@@ -27,3 +27,8 @@ npm i
 ```
 npm start
 ```
+
+## 3) Schedule as Cron Job
+```
+* * * * * ~/Git-Projects/Ameritrader-Bots/sector-scraper/sector-scraper.sh >> /home/ubuntu/Git-Projects/Ameritrader-Bots/sector-scraper/logs/`date +\%Y-\%m-\%d`-cron.log 2>&1
+```
