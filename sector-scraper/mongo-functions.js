@@ -6,21 +6,22 @@ const MongoClient = require('mongodb').MongoClient;
 
 const save = (documentToSave) => {
 
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
 
         MongoClient.connect(process.env.MONGO_URI, (err, db) => {
 
             if (err)
                 throw new Error(err)
 
-            console.log('connected to mongo for saving results...')
+            var dbo = db.db(process.env.DATABASE_NAME)
 
-            var dbo = db.db("scrape_db")
+            console.log('connecting to MongoDB at: ', process.env.MONGO_URI, ', database: ', process.env.DATABASE_NAME)
+            console.log('Intserting sector data doc to collection: ', process.env.SECTORS_SCRAPER_COLLECTION)
 
             dbo.collection(process.env.SECTORS_SCRAPER_COLLECTION).insertOne(documentToSave,
                 (err, res) => {
-                    if (err) throw err
                     db.close()
+                    if (err) reject(err)
                     resolve(res.result)
                 })
 

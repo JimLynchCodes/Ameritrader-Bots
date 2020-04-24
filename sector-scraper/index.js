@@ -3,6 +3,8 @@ require('dotenv').config()
 const axios = require('axios');
 const moment = require('moment')
 const mongoFunctions = require('./mongo-functions')
+
+const read = mongoFunctions.read
 const save = mongoFunctions.save
 
 const main = async () => {
@@ -11,6 +13,7 @@ const main = async () => {
     console.log('Calling to: ', url)
 
     const sectorData = await axios.get(url)
+    console.log('Got data: ', sectorData)
     console.log('Got data: ', sectorData.data['Meta Data'])
 
     if (!sectorData)
@@ -40,6 +43,14 @@ const main = async () => {
 
     console.log('Saved to mongo!\n', results)
 
+    return results
+
 }
 
-main()
+main().catch( err => {
+
+    // Handle any rejected promises from await
+
+    console.log("TODO - Ping Jim about this error: ", err)
+
+})
