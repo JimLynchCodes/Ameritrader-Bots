@@ -1,7 +1,9 @@
 #!/bin/bash -l
 
 printf "=======================================\n\n"
-printf "Running Sector Scraper...\n\n"
+printf "Running Sector Scraper...\n"
+printf "$(date)\n\n"
+
 # Load these for nvm and node.
 source ~/.bashrc
 source ~/.nvm/nvm.sh
@@ -17,4 +19,7 @@ nvm use
 
 # Run the cron job!
 npm run derp
+
+printf "\nSector Scraper cronjob has completed!\n"
+
 
