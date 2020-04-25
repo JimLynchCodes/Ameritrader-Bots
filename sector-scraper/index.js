@@ -4,7 +4,6 @@ const axios = require('axios');
 const moment = require('moment')
 const mongoFunctions = require('./mongo-functions')
 
-const read = mongoFunctions.read
 const save = mongoFunctions.save
 
 const main = async () => {
@@ -15,9 +14,6 @@ const main = async () => {
     const sectorData = await axios.get(url)
     console.log('Got data: ', sectorData)
     console.log('Got data: ', sectorData.data['Meta Data'])
-
-    if (!sectorData)
-        throw new Error('Coudn\'t pull data from Alphavantage!')
 
     const currentDate = moment().format('MMMM Do YYYY')
 

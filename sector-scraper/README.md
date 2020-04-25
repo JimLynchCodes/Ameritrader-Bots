@@ -29,6 +29,13 @@ npm start
 ```
 
 ## 3) Schedule as Cron Job
+
+By running the super-scraper.sh file on the given cron interval, it will run every weekday at 5:00pm. 
+
+Running the commands straight in the crontab file is not advised because you need to set up the environment again each time which can get very cluttered quickly and doesn't offer bash commands. We can keep our crontab list clean and leverage bash running the project's bash script at the desired interval. 
+
 ```
-* * * * * ~/Git-Projects/Ameritrader-Bots/sector-scraper/sector-scraper.sh >> /home/ubuntu/Git-Projects/Ameritrader-Bots/sector-scraper/logs/`date +\%Y-\%m-\%d`-cron.log 2>&1
+0 17 * * 1-5 ~/Git-Projects/Ameritrader-Bots/sector-scraper/sector-scraper.sh >> /home/ubuntu/Git-Projects/Ameritrader-Bots/sector-scraper/logs/`date +\%Y-\%m-\%d`-cron.log 2>&1
 ```
+
+Note the double side carots `>>` which is needed to append the output to the logs file, and the `2>&1` tells it to write both the standard console logs and errors to the logs file.

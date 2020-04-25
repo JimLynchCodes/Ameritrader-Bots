@@ -17,7 +17,7 @@ cd ~/Git-Projects/Ameritrader-Bots/sector-scraper
 nvm use
 
 # Run the cron job!
-npm run derp
+npm start
 
 
 printf "\nSector Scraper cronjob has completed!\n"

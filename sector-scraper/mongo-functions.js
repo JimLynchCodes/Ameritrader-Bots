@@ -16,7 +16,7 @@ const save = (documentToSave) => {
             var dbo = db.db(process.env.DATABASE_NAME)
 
             console.log('connecting to MongoDB at: ', process.env.MONGO_URI, ', database: ', process.env.DATABASE_NAME)
-            console.log('Intserting sector data doc to collection: ', process.env.SECTORS_SCRAPER_COLLECTION)
+            console.log('Inserting sector data document to collection: ', process.env.SECTORS_SCRAPER_COLLECTION)
 
             dbo.collection(process.env.SECTORS_SCRAPER_COLLECTION).insertOne(documentToSave,
                 (err, res) => {

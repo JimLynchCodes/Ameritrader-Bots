@@ -3,50 +3,51 @@ const axios = require('axios');
 
 describe('index - sector scraper main file', () => {
 
+    let mockGet
+    let mockSave
+    let mockMoment
+
     beforeEach(() => {
 
-        // const mockSave = jest.fn().mockReturnValue(() => Promise.resolve('foo'))
+        mockGet = jest.fn(() => Promise.resolve({ 'data': 'foo' }))
 
-        // jest.mock('./mongo-functions', () => {
-        //     return jest.fn().mockImplementation(() => {
-        //         return { save: mockSave };
-        //     });
-        // });
-
-        // const mockGet = jest.fn().mockImplementation(() => Promise.resolve('foo'))
-
-        const mock = jest.mock('axios').mockImplementation( () => {
-            return Promise.resolve({data: 'der'})
-        });
-
-        console.log('the mock', axios.get)
-
-        // axios.get = jest.fn().mockImplementation(() => {
-
-        //     return Promise.resolve({ data: 'foo' })
-        // }
-        // )
-
-        axios.get.mockImplementation( () => {
-            return Promise.resolve({ data: 'foo' })
+        jest.mock('axios', () => {
+            return {
+                get: mockGet
+            }
         })
 
-        // jest.mock('axios', () => {
-        //     // return jest.fn().mockImplementation(() => {
-        //     //     return { get: () => { return 'foo'} };
-        //     // });
+        jest.mock('moment', () => {
+            return () => {
+                return {
+                    format: () => (new Date())
+                }
+            }
+        })
 
-        //     return jest.fn.mockImplementation(() => {
-        //         get: () => Promise.resolve('foo')
-        //     })
-        // });
+        mockSave = jest.fn(() => Promise.resolve({ 'data': 'saved!' }))
+
+        jest.mock('./mongo-functions', () => {
+            return {
+                save: mockSave
+            }
+        })
 
     })
 
 
-    it('should', async () => {
+    it('should take the response from Alphavantage and insert it into Mongo', async () => {
+
         const index = require('./index.js')
-        expect(true).toBe(true)
+
+        expect(mockGet).toHaveBeenCalledTimes(1)
+        expect(mockGet).toHaveBeenCalledWith(process.env.ALPHAVANTAGE_SECTORS_ENDPOINT)
+
+        expect(mockSave).toHaveBeenCalledTimes(1)
+        expect(mockSave).toHaveBeenCalledWith({'foo': 'bar'})
+
+
+
     })
 
 })
