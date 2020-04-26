@@ -1,0 +1,30 @@
+{
+  "name": "tg-notifier",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "jest --coverage --watch"
+  },
+  "author": "Jim",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "aws-sdk": "^2.661.0",
+    "dotenv": "^8.2.0",
+    "moment": "^2.24.0",
+    "mongodb": "^3.5.6"
+  },
+  "devDependencies": {
+    "jest": "^25.4.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json"
+    ],
+    "testMatch": [
+      "**/*.test.js"
+    ]
+  }
+}

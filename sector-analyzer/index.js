@@ -15,10 +15,11 @@ const main = async () => {
 
         const currentDay = moment().format('MMMM Do YYYY')
         const currentTime = moment().format('h:mm:ss a')
-
-        console.log('Analyzing scraped us sector data for triple gainers...')
-
+        
+        console.log('Pulling the most recent analyzed us sector data for triple gainers...')
         const scrapedData = await read(currentDay)
+        
+        console.log(`Analyzing scraped sectors data from: ${scrapedData[date_scraped]} ${scrapedData[time_scraped]}`)
 
         const data_1d = scrapedData['1_day']
 
