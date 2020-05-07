@@ -4,30 +4,59 @@
 
 const MongoClient = require('mongodb').MongoClient;
 
-const readSectors = () => {
-    // console.log('Reading data from: ', process.env.MONGO_URI, '\nFor the day: ', day)
+/**
+ *  Pulls latest sector analysis document from the given collection set in .env
+ */
+const readSectorsTgAnalysis = () => {
 
     return new Promise((resolve, reject) => {
 
         MongoClient.connect(process.env.MONGO_URI, async (err, db) => {
             if (err) throw err
 
-            console.log('connected to mongo collection to read sector scrapes from: ', process.env.TG_ANALYSIS_COLLECTION)
+            console.log('connected to mongo collection to read sector scrapes from: ', process.env.SECTORS_TG_ANALYSIS_COLLECTION)
 
             var dbo = db.db(process.env.DATABASE_NAME)
 
-            const days_scraped_data = await dbo.collection(process.env.TG_ANALYSIS_COLLECTION)
+            const sectors_analysis_data = await dbo.collection(process.env.SECTORS_TG_ANALYSIS_COLLECTION)
                 .find()
                 .sort({ '_id': -1 })
                 .limit(1)
                 .next()
 
-            resolve(days_scraped_data)
+            resolve(sectors_analysis_data)
+
+        })
+    })
+}
+
+/**
+ *  Pulls latest sector analysis document from the given collection set in .env
+ */
+const readStocksTgAnalysis = () => {
+
+    return new Promise((resolve, reject) => {
+
+        MongoClient.connect(process.env.MONGO_URI, async (err, db) => {
+            if (err) throw err
+
+            console.log('connected to mongo collection to read sector scrapes from: ', process.env.STOCK_TG_ANALYSIS_COLLECTION)
+
+            var dbo = db.db(process.env.DATABASE_NAME)
+
+            const stocks_analysis_data = await dbo.collection(process.env.STOCK_TG_ANALYSIS_COLLECTION)
+                .find()
+                .sort({ '_id': -1 })
+                .limit(1)
+                .next()
+
+            resolve(stocks_analysis_data)
 
         })
     })
 }
 
 module.exports = {
-    readSectors
+    readSectorsTgAnalysis,
+    readStocksTgAnalysis
 }

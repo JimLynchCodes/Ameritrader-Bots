@@ -10,10 +10,12 @@
   "author": "Jim",
   "license": "GPL-3.0",
   "dependencies": {
+    "@sendgrid/mail": "^7.0.1",
     "aws-sdk": "^2.661.0",
     "dotenv": "^8.2.0",
     "moment": "^2.24.0",
-    "mongodb": "^3.5.6"
+    "mongodb": "^3.5.6",
+    "twilio": "^3.42.2"
   },
   "devDependencies": {
     "jest": "^25.4.0"

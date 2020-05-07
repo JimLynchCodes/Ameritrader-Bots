@@ -36,8 +36,9 @@ const main = async () => {
             tgReport[stockCategory] = {}
 
             // Symbols that occur in all three lists, using stock symbol as the key
-            const occurrenceCountGainers = {}
-            const occurrenceCountLosers = {}
+            // const occurrenceCountGainers = {}
+            // const occurrenceCountLosers = {}
+            const occurrenceCount = {}
 
             // const identifiedTripleLosers = []
             // const identifiedTripleGainers = []
@@ -53,61 +54,64 @@ const main = async () => {
 
                 tgReport[stockCategory][gainerOrLoserString] = []
 
+                occurrenceCount[gainerOrLoserString] = {}
+
                 scrapedData['categories'][stockCategory][gainerOrLoserString]['today'].forEach(rowOfTodayData => {
 
                     // console.log('um: ', scrapedData['categories'][stockCategory]['gainers'])
-                    // console.log('checking stock: ', rowOfTodayData[0], ' ', occurrenceCountGainers[rowOfTodayData[0]])
-                    if (occurrenceCountGainers[rowOfTodayData[0]] === undefined) {
-                        occurrenceCountGainers[rowOfTodayData[0]] = { count: 1 }
+                    // console.log('checking stock: ', rowOfTodayData[0], ' ', occurrenceCount[gainerOrLoserString][rowOfTodayData[0]])
+                    if (occurrenceCount[gainerOrLoserString][rowOfTodayData[0]] === undefined) {
+                        occurrenceCount[gainerOrLoserString][rowOfTodayData[0]] = { count: 1 }
                     } else {
-                        occurrenceCountGainers[rowOfTodayData[0]].count = occurrenceCountGainers[rowOfTodayData[0]].count + 1
+                        occurrenceCount[gainerOrLoserString][rowOfTodayData[0]].count = occurrenceCount[gainerOrLoserString][rowOfTodayData[0]].count + 1
 
                     }
 
                     // for "today" on barchart, use the "%Chg" (index 4)
-                    // console.log(`Adding today\'s  ${scrapedData['categories'][stockCategory]['gainers']['today'][0][4]}, ${rowOfTodayData[4]}`)
-                    occurrenceCountGainers[rowOfTodayData[0]].gainOrLoss1d = rowOfTodayData[4]
+                    console.log(`Adding today\'s  ${scrapedData['categories'][stockCategory]['gainers']['today'][0][4]}, ${rowOfTodayData[4]}`)
+                    occurrenceCount[gainerOrLoserString][rowOfTodayData[0]].gainOrLoss1d = rowOfTodayData[4]
 
                 })
 
                 scrapedData['categories'][stockCategory][gainerOrLoserString]['5d'].forEach(rowOf5dData => {
 
-                    if (occurrenceCountGainers[rowOf5dData[0]] === undefined) {
-                        occurrenceCountGainers[rowOf5dData[0]] = { count: 1 }
+                    if (occurrenceCount[gainerOrLoserString][rowOf5dData[0]] === undefined) {
+                        occurrenceCount[gainerOrLoserString][rowOf5dData[0]] = { count: 1 }
                     } else {
-                        occurrenceCountGainers[rowOf5dData[0]].count = occurrenceCountGainers[rowOf5dData[0]].count + 1
+                        occurrenceCount[gainerOrLoserString][rowOf5dData[0]].count = occurrenceCount[gainerOrLoserString][rowOf5dData[0]].count + 1
                     }
                     // for 5d on barchart, use the "5D %Chg" (index 2)
                     console.log(`Adding 5d\'s  ${scrapedData['categories'][stockCategory][gainerOrLoserString]['5d'][0][2]}, ${rowOf5dData[2]}`)
-                    occurrenceCountGainers[rowOf5dData[0]].gainOrLoss5d = rowOf5dData[2]
+                    occurrenceCount[gainerOrLoserString][rowOf5dData[0]].gainOrLoss5d = rowOf5dData[2]
 
                 })
 
                 scrapedData['categories'][stockCategory][gainerOrLoserString]['1m'].forEach(rowOf1mData => {
 
-                    if (occurrenceCountGainers[rowOf1mData[0]] === undefined) {
-                        occurrenceCountGainers[rowOf1mData[0]] = { count: 1 }
+                    if (occurrenceCount[gainerOrLoserString][rowOf1mData[0]] === undefined) {
+                        occurrenceCount[gainerOrLoserString][rowOf1mData[0]] = { count: 1 }
                     } else {
-                        occurrenceCountGainers[rowOf1mData[0]].count = occurrenceCountGainers[rowOf1mData[0]].count + 1
+                        occurrenceCount[gainerOrLoserString][rowOf1mData[0]].count = occurrenceCount[gainerOrLoserString][rowOf1mData[0]].count + 1
                     }
 
                     // for 1m on barchart, use the "1m %Chg" (index 2)
                     console.log(`Adding 1m\'s  ${scrapedData['categories'][stockCategory][gainerOrLoserString]['1m'][0][2]}, ${rowOf1mData[2]}`)
-                    occurrenceCountGainers[rowOf1mData[0]].gainOrLoss1m = rowOf1mData[2]
+                    occurrenceCount[gainerOrLoserString][rowOf1mData[0]].gainOrLoss1m = rowOf1mData[2]
 
-                    if (occurrenceCountGainers[rowOf1mData[0]].count === 3) {
-                        console.log('triple gainer identified! ', rowOf1mData[0])
+                    if (occurrenceCount[gainerOrLoserString][rowOf1mData[0]].count === 3) {
 
-                        const gainOrLoss1dString = occurrenceCountGainers[rowOf1mData[0]].gainOrLoss1d
-                        const gainOrLoss5dString = occurrenceCountGainers[rowOf1mData[0]].gainOrLoss5d
-                        const gainOrLoss1mString = occurrenceCountGainers[rowOf1mData[0]].gainOrLoss1m
+                        const gainOrLoss1dString = occurrenceCount[gainerOrLoserString][rowOf1mData[0]].gainOrLoss1d
+                        const gainOrLoss5dString = occurrenceCount[gainerOrLoserString][rowOf1mData[0]].gainOrLoss5d
+                        const gainOrLoss1mString = occurrenceCount[gainerOrLoserString][rowOf1mData[0]].gainOrLoss1m
 
-                        const gainOrLoss1d = occurrenceCountGainers[rowOf1mData[0]].gainOrLoss1d.replace(/\+|\%/ig, '')
+                        console.log('triple ', gainerOrLoserString, ' identified! ', rowOf1mData[0])
+                        console.log('tg 1d! ', occurrenceCount[gainerOrLoserString][rowOf1mData[0]].gainOrLoss1d)
+                        console.log('tg 5d! ', occurrenceCount[gainerOrLoserString][rowOf1mData[0]].gainOrLoss5d)
+                        console.log('tg 1m! ', occurrenceCount[gainerOrLoserString][rowOf1mData[0]].gainOrLoss1m)
 
-                        // console.log('gain or loss 1d: ', gainOrLoss1d)
-
-                        const gainOrLoss5d = parseFloat(occurrenceCountGainers[rowOf1mData[0]].gainOrLoss5d.replace(/\+|\%/ig, ''))
-                        const gainOrLoss1m = parseFloat(occurrenceCountGainers[rowOf1mData[0]].gainOrLoss1m.replace(/\+|\%/ig, ''))
+                        const gainOrLoss1d = parseFloat(occurrenceCount[gainerOrLoserString][rowOf1mData[0]].gainOrLoss1d.replace(/\+|\%/ig, ''))
+                        const gainOrLoss5d = parseFloat(occurrenceCount[gainerOrLoserString][rowOf1mData[0]].gainOrLoss5d.replace(/\+|\%/ig, ''))
+                        const gainOrLoss1m = parseFloat(occurrenceCount[gainerOrLoserString][rowOf1mData[0]].gainOrLoss1m.replace(/\+|\%/ig, ''))
 
                         const weightedChangePercentage = (((
                             3 * gainOrLoss1d * 100 +
@@ -140,13 +144,13 @@ const main = async () => {
 
                 })
 
-                // console.log('final occurrence map: ', JSON.stringify(occurrenceCountGainers, null, 2))
+                console.log('final occurrence map: ', JSON.stringify(occurrenceCount[gainerOrLoserString], null, 2))
 
                 // console.log('tg\'s:', JSON.stringify(identifiedTripleGainers, null, 2))
 
             })
 
-           
+
             // console.log('g: ', tgReport['all_us_exchanges'])
             // console.log('g: ', Object.keys(tgReport['large_cap_us']))
 
@@ -210,20 +214,25 @@ const main = async () => {
 
             // dataToSave.set('foo', { boubleFoo: 'bar' })
 
-            // const results = await save(dataToSave)
 
-            // console.log('Saved tg analysis to mongo!\n', results)
-
-
-            
         })
         
+        const results = await save({
+            'date_scraped': currentDay,
+            'time_scraped': currentTime,
+            results: tgReport
+        })
+
+        console.log('Saved tg analysis to mongo!\n', results)
+
         resolve(null)
 
-        console.log('g: ', Object.keys(tgReport))
-        console.log('g: ', Object.keys(tgReport['large_cap_us']['gainers']))
-        console.log('l: ', Object.keys(tgReport['large_cap_us']['losers']))
-        console.log('l: ', tgReport['large_cap_us']['losers'][0])
+        // console.log('g: ', Object.keys(tgReport))
+        // console.log('g: ', Object.keys(tgReport['large_cap_us']['gainers']))
+        // console.log('l: ', Object.keys(tgReport['large_cap_us']['losers']))
+        // console.log('l: ', tgReport['large_cap_us']['losers'][0])
+        // console.log('l: ', tgReport['large_cap_us']['losers'][1])
+        // console.log('l: ', tgReport['large_cap_us']['losers'][2])
     })
 }
 

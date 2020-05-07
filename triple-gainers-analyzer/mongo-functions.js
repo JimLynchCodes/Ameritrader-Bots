@@ -41,7 +41,7 @@ const save = (documentToSave) => {
 
             console.log('connected to mongo for saving results...')
 
-            var dbo = db.db("scrape_db")
+            var dbo = db.db(process.env.DATABASE_NAME)
 
             dbo.collection(process.env.SECTORS_ANALYSIS_COLLECTION).insertOne(documentToSave,
                 (err, res) => {
