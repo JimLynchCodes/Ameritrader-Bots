@@ -22,8 +22,6 @@ const read = (day) => {
                 .limit(1)
                 .next()
 
-            // console.log('data ', days_scraped_data['categories']['large_cap_us']['gainers']['today'])
-
             resolve(days_scraped_data)
 
         })

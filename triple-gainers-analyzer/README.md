@@ -28,3 +28,35 @@ npm i
 ```
 npm start
 ```
+
+
+# Deploying
+
+## Use the Bash Script
+The bash script loads the profiles again (allowing usage of node and nvm), runs `nvm use`, and then runs `npm start`. 
+
+
+Clone this repo on your server and navigate into it.
+
+
+Allow your current shell user to execute the file:
+```
+chmod +x run-analyzer.sh
+```
+
+Then run it like this:
+```
+./run-analyzer.sh
+```
+
+To schedule and a cronjob, edit the crontab file:
+```
+crontab -e
+```
+
+Then add an entry on a new line that runs the bash file (saving any logs to the logs folder).
+
+This cron schedule will run every weekday at 5:00pm
+```
+0 5 * * 1-5 cd ~/Git-Projects/Ameritrader-Bots/triple-gainers-analyzer/run-analyzer.sh >> ~/Git-Projects/Ameritrader-Bots/triple-gainers-analyzer/logs/cron-logs_`date +\%Y-\%m-\%d`.log 2>&1
+```
