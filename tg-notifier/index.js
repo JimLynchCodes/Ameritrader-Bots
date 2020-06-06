@@ -1,5 +1,6 @@
 
 require('dotenv').config()
+const logger = require('./logger')
 const moment = require('moment')
 const mongoFunctions = require('./mongo-functions')
 const readSectorsTgAnalysis = mongoFunctions.readSectorsTgAnalysis
@@ -10,9 +11,15 @@ const sortByBcOpinion = require('./sort-by-bc-opinion')
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_ACCOUNT_TOKEN;
 
-console.log('1: ', accountSid, ', 2: ', authToken)
 const client = require('twilio')(accountSid, authToken);
+
+const getSendgridTripleGainersEmailRecipients = require('./get-sg-tg-email-recipients')
+
 const sgMail = require('@sendgrid/mail');
+const sgClient = require('@sendgrid/client');
+sgClient.setApiKey(process.env.SENDGRID_KEY);
+sgMail.setApiKey(process.env.SENDGRID_KEY);
+
 
 const AWS = require('aws-sdk');
 AWS.config.update({ region: 'us-east-1' });
@@ -25,46 +32,37 @@ const main = async () => {
 
   const currentDay = moment().format('MMMM DD, YYYY')
 
-
-  // console.log('Pulling the most recent analyzed us sector data for triple gainers...')
+  // logger.info('Pulling the most recent analyzed us sector data for triple gainers...')
   // const analyzedSectors = await readSectorsTgAnalysis()
-  // console.log(`Pulled analyzed SECTOR data from ${analyzedSectors['date_scraped']} ${analyzedSectors['time_scraped']}`)
-  // console.log(analyzedSectors)
-
-  const analyzedSectors = []
+  // logger.info(`Pulled analyzed SECTOR data from ${analyzedSectors['date_scraped']} ${analyzedSectors['time_scraped']}`)
+  // logger.info(analyzedSectors)
 
   const analyzedStocks = await readStocksTgAnalysis()
-  console.log(`Pulled analyzed STOCK data from ${analyzedStocks['date_scraped']} ${analyzedStocks['time_scraped']}`)
-  console.log(analyzedStocks)
+  logger.info(`Pulled analyzed STOCK data from ${analyzedStocks['date_scraped']} ${analyzedStocks['time_scraped']}`)
 
-
-
-  let largeCapGainersDataTextableString
-  const largeCapGainersDataList = analyzedStocks.results['large_cap_us']['gainers']
+  const largeCapGainersDataTextableString = analyzedStocks.results['large_cap_us']['gainers']
     /**
      *  Sorting by "BC_Opinion"
      */
     .sort(sortByBcOpinion)
-    .filter((stockDataObj) => {
-
-      const bcOpinionString = stockDataObj['BC_Opinion']
-
-      return parseFloat(bcOpinionString.substr(0, bcOpinionString.length - 2)) > 25
-    })
     .map(gainerObj => {
       return `${gainerObj.Symbol}: ${gainerObj['tg_weighted_change_%']}, ${gainerObj['BC_Opinion']}\n`
     })
+    .join('')
 
-  // Limit to only top 16 
-  if (largeCapGainersDataList.length > 16) {
-    const firstEight = largeCapGainersDataList.slice(0, 8)
-    const lastEight = largeCapGainersDataList.slice(largeCapGainersDataList.length - 9, largeCapGainersDataList.length - 1)
+  // /** Limit to only top 16 */ 
+  // if (largeCapGainersDataList.length > 16) {
+  //   const firstEight = largeCapGainersDataList.slice(0, 8)
+  //   const lastEight = largeCapGainersDataList.slice(largeCapGainersDataList.length - 9, largeCapGainersDataList.length - 1)
 
-    largeCapGainersDataTextableString = [...firstEight, ...lastEight].join('')
+  //   largeCapGainersDataTextableString = [...firstEight, ...lastEight].join('')
 
-  } else {
-    largeCapGainersDataList.join('')
-  }
+  // } else {
+  //   largeCapGainersDataList.join('')
+  // }
+
+  const largeCapGainersTableRows = buildRowFromMongoData(analyzedStocks, 'gainers')
+  const largeCapLosersTableRows = buildRowFromMongoData(analyzedStocks, 'losers')
 
   const largeCapLosersDataTextableString = analyzedStocks.results['large_cap_us']['losers']
     /**
@@ -85,95 +83,174 @@ const main = async () => {
   // }).join('')
   //   : []
 
+  const numberOfGainers = analyzedStocks.results['large_cap_us']['gainers'].length
+  const numberOfLosers = analyzedStocks.results['large_cap_us']['losers'].length
 
-  // const fullText = 'Good morning! 🌞\n' +
-  //   `Here's the Triple Gainers report for ${currentDay}! 🤖\n\n` +
-  //   '-- LARGE CAP (US) --\n' +
-  //   '(ticker, weighted avg of % change for prev day, 5d, and 1m, barchart opinion)\n' +
-  //   'GAINERS:\n' +
-  //   largeCapGainersDataTextableString +
-  //   '\n' +
-  //   'LOSERS:\n' +
-  //   largeCapLosersDataTextableString +
-  //   '\n' +
-  //   // '-- SECTORS (US) --\n' +
-  //   // '(ranked weighted average of 1d, 5d, 1m price movements for S&P500 incumbents):\n' +
-  //   // sectorsWeightedRanksString +
-  //   // '\n' +
-  //   'That\'s all for now! For help contact: tg-help@eon.com\n\n' +
-  //   'May the gains be with you. 💪\n\n' +
-  //   'Disclaimer: any information here may be incorrect. Invest at your own risk!'
+  logger.info(`Notifying of ${numberOfGainers} gainers and ${numberOfLosers} losers.`)
 
-  const fullText = 'TG Highlights:\n' +
-  `\n` +
-  '-- LARGE CAP (US) --\n' +
-  // '(ticker, weighted avg of % change for prev day, 5d, and 1m, barchart opinion)\n' +
-  'GAINERS:\n' +
-  largeCapGainersDataTextableString +
-  '\n' +
-  'LOSERS:\n' +
-  largeCapLosersDataTextableString +
-  '\n' +
-  // '-- SECTORS (US) --\n' +
-  // '(ranked weighted average of 1d, 5d, 1m price movements for S&P500 incumbents):\n' +
-  // sectorsWeightedRanksString +
-  // '\n' +
-  // 'That\'s all for now! For help contact: tg-help@eon.com\n\n' +
-  'May the gains be with you. 💪'
-  // 'Disclaimer: any information here may be incorrect. Invest at your own risk!'
+  const fullTextEmail =
+    `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">` +
+    // `<html>` +
+    // `<body>` +
+    '<div style="background:rgb(255,255,255);max-width:600px;width:100%;margin:0px auto; text-align: center;">' +
+    'Hey there! 🤖\n' +
+    `Here's the Triple Gainers report for ${currentDay}! 🤖\n\n` +
+    `\n` +
+    '<h2>-- LARGE CAP (US) --</h2>\n' +
+    '<h3>Gainers:</h3>\n' +
+    '<table border="1" cellspacing="0" padding="5" style="border: 1px solid black;">' +
+    '<tr>' +
+    tableHeaders() +
+    '</tr>' +
+    largeCapGainersTableRows +
+    '</table>' +
+
+    '<h3>Losers:</h3>\n' +
+    '<table border="1" cellspacing="0" padding="5" style="border: 1px solid black;">' +
+    '<tr>' +
+    tableHeaders() +
+    '</tr>' +
+    largeCapLosersTableRows +
+    '</table>' +
 
 
+    //     `
+    //     <table cellpadding="0" cellspacing="0" width="640" align="center" border="1">     
+    // <tr>         
+    // <td>             
+    // <table cellpadding="0" cellspacing="0" width="318" align="left" border="1">                
+    //  <tr>                     
+    // <td>Logo goes here.</td>                 
+    // </tr>             
+    // </table>             
+    // <table cellpadding="0" cellspacing="0" width="318" align="left" border="1">                 
+    // <tr>                     
+    // <td>Image goes here.</td>                 
+    // </tr>             
+    // </table>         
+    // </td>     
+    // </tr> 
+    // </table> 
+    //     ` + 
 
+
+    // '(tcdicker, weighted avg of % change at today\'s close, 5d, and 1m, TG weighted average % change, barchart opinion, 20D RSI, Today\'s Volume / 20D Avg Daily Volume)\n' +
+    // `GAINERS: (${numberOfGainers})\n` +
+    // largeCapGainersDataTextableString +
+    // '\n' +
+    // `LOSERS: (${numberOfLosers})\n` +
+    // largeCapLosersDataTextableString +
+    // '\n' +
+    // '-- SECTORS (US) --\n' +
+    // '(ranked weighted average of 1d, 5d, 1m price movements for S&P500 incumbents):\n' +
+    // sectorsWeightedRanksString +
+    // '\n' +
+    '<p>&nbsp;</p>' +
+    `<p>That's all for now!</p><p>If you have any questions, reply to this email, and we'll get back to you soon.</p>` +
+    '<p>May the gains be with you. 💪</p>' +
+    '<p>Disclaimer: any information here may be incorrect. Invest at your own risk!</p>' +
+    '<p>Have friends who want to receive the daily Triple Gainers report? <a href="https://cdn.forms-content.sg-form.com/f034a73f-a80f-11ea-8e17-928c85d443c0">Sign up here</a>!</p>' +
+    '<p>Disclaimer: any information here may be incorrect. Invest at your own risk!</p>' +
+    '<p><a href="https://cdn.forms-content.sg-form.com/f034a73f-a80f-11ea-8e17-928c85d443c0">Unsubscribe</a>s</p>' +
+    // '<a href="<% Unsubscribe Here %>">Click here to unsubscribe.</a>' +
+    // 'cdc [%unsubscribe%]' +
+    // '' +
+    // '<% asm_group_unsubscribe_url %>' +
+    '</div>'
+  // '</body>'
+  // '</html>'
+
+  const shortenedTextMobile = `Hey there! 🤖\n` +
+    `Triple Gainers stats for ${currentDay}:\n` +
+    `Gainers: ${numberOfGainers}\n` +
+    `Losers: ${numberOfLosers}\n\n` +
+    `May the gains be with you. 💪`
+
+  // logger.log(`Email message to send:\n${fullTextEmail}`)
+  // logger.log(`${fullTextEmail}`)
+  // logger.log(`Mobile message to send:\n${shortenedTextMobile}`)
 
   if (JSON.parse(process.env.DISABLE_ALL_MESSAGE_SENDING)) {
-    console.log('All message sending has been disabled by the env variable, DISABLE_ALL_MESSAGE_SENDING: ', process.env.DISABLE_ALL_MESSAGE_SENDING)
+    logger.info('All message sending has been disabled by the env variable, DISABLE_ALL_MESSAGE_SENDING: ', process.env.DISABLE_ALL_MESSAGE_SENDING)
   } else {
-    console.log('Full text, this many characters:', fullText.length)
-
-    console.log('\n\n\n')
-    console.log(fullText)
-    console.log('\n\n\n')
 
     /**
-     * Publish to sns topic
+     * Publish to EMAIL subscribers sns topic
+     * 
+     *   SNS CANNOT SEND HTML EMAILS SO PLS DON'T TRY TO USE IT FOR THAT. K THANKS, BYE.
      */
 
-    const snsParams = {
-      Message: fullText,
-      TopicArn: process.env.TRIPLE_GAINER_SUBSCRIBERS_ARN
-    }
+    // const snsEmailParams = {
+    //   Message: fullTextEmail,
+    //   TopicArn: process.env.TRIPLE_GAINERS_EMAIL_SUBSCRIBERS_ARN
+    // }
 
-    console.log('Sending snsParams: ', snsParams)
+    // const publishEmailResult = await new AWS.SNS({ apiVersion: '2010-03-31' }).publish(snsEmailParams).promise();
 
-    const publishTextPromise = new AWS.SNS({ apiVersion: '2010-03-31' }).publish(snsParams).promise();
-    const publishResult = await publishTextPromise
+    /**
+     * Publish to MOBILE subscribers sns topic
+     */
+    // const snsMobileParams = {
+    //   Message: shortenedTextMobile,
+    //   TopicArn: process.env.TRIPLE_GAINERS_MOBILE_SUBSCRIBERS_ARN
+    // }
 
-    console.log('The notifications have been sent! 🥳\n', publishResult)
+    // logger.info(`Published to Email subscribers topic!`)
 
+    // const publishMobileResult = await new AWS.SNS({ apiVersion: '2010-03-31' }).publish(snsMobileParams).promise();
 
-    // const textMessage = await client.messages
-    //   .create({
-    //     body: fullText,
-    //     from: '+12025194549',
-    //     to: '+19177453133'
-    //   })
-
-    // sgMail.setApiKey(process.env.SENDGRID_KEY);
-    // const msg = {
-    //   to: 'jim@wisdomofjim.com',
-    //   from: 'jim.lynch@evaluates2.com',
-    //   subject: 'Sending with Twilio SendGrid is Fun',
-    //   text: fullText,
-    //   html: fullText,
-    // };
-
-    // const mailResponse = await sgMail.send(msg);
-
-    // console.log('mail response: ', mailResponse)
+    // logger.info(`Published to Mobile subscribers topic!`)
 
 
 
+    // Sendgrid stuff...
 
+
+    /**
+     * 
+     *  Getting Sendgrid triple gainers contacts
+     * 
+     */
+
+    const sgTgRecipients = await getSendgridTripleGainersEmailRecipients(process.env.TG_SG_EMAIL_SUBSCRIBERS_LIST_ID)
+
+    console.log(JSON.stringify(sgTgRecipients))
+    logger.info(`sendgrid recipients: ${JSON.stringify(sgTgRecipients)}`)
+
+    // const emailSubscribers = ['jim@wisdomofjim.com']
+
+    // emailSubscribers.forEach((emailSubscriber, index) => {
+
+    //   if (index === 0) {
+
+    //     setTimeout(async () => {
+
+    const msg = {
+      to: sgTgRecipients,
+      from: 'jim.lynch@evaluates2.com',
+      subject: `Triple Gainers for ${currentDay}!`,
+      text: fullTextEmail,
+      html: fullTextEmail,
+      tracking_settings: {
+        subscription_tracking: {
+          enable: false,
+          substitution_tag: '<% Unsubscribe Here %>'
+        }
+      }
+    };
+
+
+    const mailResponse = await sgMail.send(msg)
+
+      .catch(err => {
+        console.log('err sending: ', err)
+      })
+
+    //     }, 900 * index)
+
+    //   }
+
+    // })
 
 
 
@@ -183,15 +260,16 @@ const main = async () => {
     // number.forEach((chunk, i) => {
     // let numberofChunks = 1
 
-    // if (fullText.length > MESSAGE_CHUNK_SIZE) {
-    //   numberofChunks = Math.floor(fullText.length / MESSAGE_CHUNK_SIZE) + 1
+    // if (fullTextEmail.length > MESSAGE_CHUNK_SIZE) {
+    //   numberofChunks = Math.floor(fullTextEmail.length / MESSAGE_CHUNK_SIZE) + 1
     // }
 
     // for (i = 0; i < numberofChunks; i++) {
     //   const chunk = i === numberofChunks - 1 ?
-    //     fullText.substring(i * MESSAGE_CHUNK_SIZE, fullText.length-1) :
-    //     fullText.substr(i * MESSAGE_CHUNK_SIZE, MESSAGE_CHUNK_SIZE)
+    //     fullTextEmail.substring(i * MESSAGE_CHUNK_SIZE, fullTextEmail.length-1) :
+    //     fullTextEmail.substr(i * MESSAGE_CHUNK_SIZE, MESSAGE_CHUNK_SIZE)
 
+    logger.info('\n\nThe notifications have been sent! 🥳\n')
   }
 
   return process.exit(0)
@@ -203,3 +281,54 @@ main().catch(err => {
   console.log('TODO - send this error to Jim! ', err)
 
 })
+
+
+const buildRowFromMongoData = (analyzedStocks, gainersOrLosers) => {
+
+  return analyzedStocks.results['large_cap_us'][gainersOrLosers]
+    .sort(sortByBcOpinion)
+    .map(gainerObj => {
+      // return `${gainerObj.Symbol}: ${gainerObj['tg_weighted_change_%']}, ${gainerObj['BC_Opinion']}\n`
+
+      return `<tr>` +
+        '<td>' +
+        gainerObj.Symbol +
+        '</td>' +
+        '<td>' +
+        gainerObj['tg_weighted_change_%'] +
+        '</td>' +
+        '<td>' +
+        gainerObj['1d_change_%'] +
+        '</td>' +
+        '<td>' +
+        gainerObj['5d_change_%'] +
+        '</td>' +
+        '<td>' +
+        gainerObj['1m_change_%'] +
+        '</td>' +
+        '<td>' +
+        gainerObj['20d_rsi: '] +
+        '</td>' +
+        '<td>' +
+        gainerObj['1D Volm / 20D Volm: '] +
+        '</td>' +
+        '<td>' +
+        gainerObj['BC_Opinion'] +
+        '</td>' +
+        '</tr>'
+    })
+    .join('')
+
+}
+
+const tableHeaders = () => {
+
+  return '<th><h4>&nbsp;Symbol&nbsp;</h4></th>' +
+    '<th><h4>&nbsp;TG % Change&nbsp;</h4></th>' +
+    '<th><h4>&nbsp;1D % Change&nbsp;</h4></th>' +
+    '<th><h4>&nbsp;5D % Change&nbsp;</h4></th>' +
+    '<th><h4>&nbsp;1M % Change&nbsp;</h4></th>' +
+    '<th><h4>&nbsp;20D RSI&nbsp;</h4></th>' +
+    '<th><h4>&nbsp;1D/20D Volm Ratio&nbsp;</h4></th>' +
+    '<th><h4>&nbsp;BC Opinion&nbsp;</h4></th>'
+}
