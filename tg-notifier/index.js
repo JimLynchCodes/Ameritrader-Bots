@@ -226,19 +226,33 @@ const main = async () => {
     //     setTimeout(async () => {
 
     const msg = {
-      to: sgTgRecipients,
+      // to: sgTgRecipients,
+      // to: 'help@katefromhr.com',
+      // from: 'jim.lynch@evaluates2.com',
+      to: 'help@katefromhr.com',
       from: 'jim.lynch@evaluates2.com',
       subject: `Triple Gainers for ${currentDay}!`,
-      text: fullTextEmail,
-      html: fullTextEmail,
-      tracking_settings: {
-        subscription_tracking: {
-          enable: false,
-          substitution_tag: '<% Unsubscribe Here %>'
-        }
-      }
+      // // text: fullTextEmail,
+      text: 'foobar text 45',
+      // html: 'foobar 45',
+      // asm: {
+      //   group_id: 14385
+      // }
+      // html: 'foo bar for ddthe win!',
+      templateId: 'd-0ce53859dc344584b37c06fca0ba30d5',
+      // asm: {
+      //   groupId: 14385,
+      // },
+      // dynamic_template_data: {
+      //   body: 'derp derp {{foo}}',
+      //   'foo': 'barskies'
+      // },
+      // mail_settings: {
+      //   sandbox_mode: {
+      //     enable: sendgridSandboxMode,
+      //   },
+      // },
     };
-
 
     const mailResponse = await sgMail.send(msg)
 
@@ -252,6 +266,7 @@ const main = async () => {
 
     // })
 
+    console.log('Mails have beent sent! ', mailResponse)
 
 
     /**
