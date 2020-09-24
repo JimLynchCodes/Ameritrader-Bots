@@ -19,5 +19,4 @@ nvm use
 # Run the cron job!
 npm start
 
-
 printf "\nTriple Gainer Notifier cronjob has completed!\n"

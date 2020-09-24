@@ -123,6 +123,7 @@ const main = async () => {
 
           if (i === (sgTgRecipients.length - 1)) {
             logger.info('\n\nThe notifications have been sent! 🥳\n')
+            process.exit(0)
           }
 
         }).catch(err => {
