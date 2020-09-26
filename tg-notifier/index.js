@@ -49,12 +49,17 @@ const main = async () => {
   const fullTextEmail =
     `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">` +
     '<div style="background:rgb(255,255,255);max-width:600px;width:100%;margin:0px auto; text-align: center;">' +
-    '\nHey there! 🤖\n' +
-    `Here's the Triple Gainers report for ${currentDay}! 🤖\n\n` +
-    `\n` +
-    '<h2>-- LARGE CAP (US) --</h2>\n' +
-
-    '<h3>Gainers:</h3>\n' +
+    
+    '<br/>' +
+    '<h1>Triple Gainers</h1>' + 
+    '<p>The highest percentage changed stocks for the past day, week, and month.</p>' +
+    '<hr/>' +
+    '<br/>' +
+    `Hey there! Here's the Triple Gainers report for ${analyzedStocks['date_scraped']}!&nbsp;🤖` +
+    '<br/>' +
+    '<br/>' +
+    '<h2>-- LARGE CAP (US) --</h2>' +
+    '<h3>Gainers:</h3>' +
     '<table border="1" cellspacing="0" padding="5" style="border: 1px solid black;">' +
     '<tr>' +
     tableHeaders() +
@@ -85,7 +90,7 @@ const main = async () => {
     '</div>'
 
   const shortenedTextMobile = `Hey there! 🤖\n` +
-    `Triple Gainers stats for ${currentDay}:\n` +
+    `Triple Gainers stats for ${analyzedStocks['date_scraped']}:\n` +
     `Gainers: ${numberOfGainers}\n` +
     `Losers: ${numberOfLosers}\n\n` +
     `May the gains be with you. 💪`
@@ -94,11 +99,15 @@ const main = async () => {
     logger.info('All message sending has been disabled by the env variable, DISABLE_ALL_MESSAGE_SENDING: ', process.env.DISABLE_ALL_MESSAGE_SENDING)
   } else {
 
-    const sgTgRecipients = await getSendgridTripleGainersEmailRecipients(process.env.TG_SG_EMAIL_SUBSCRIBERS_LIST_ID)
+    const sgTgTrueRecipients = await getSendgridTripleGainersEmailRecipients(process.env.TG_SG_EMAIL_SUBSCRIBERS_LIST_ID)
 
-    logger.info(`sendgrid recipients: ${JSON.stringify(sgTgRecipients)}`)
+    logger.info(`sendgrid recipients: ${JSON.stringify(sgTgTrueRecipients)}`)
+    
+    logger.info(`PROD is (${process.env.PROD === 'true' ? 'true' : 'false'}) - ${process.env.PROD !== 'true' ? 'NOT' : ''} sending to real recipients...`)
 
-    sgTgRecipients.forEach((recipient, i) => {
+    sgRecipients = process.env.PROD === 'true' ? sgTgTrueRecipients : ['mrdotjim@gmail.com']
+
+    sgRecipients.forEach((recipient, i) => {
 
       sg.setApiKey(process.env.SENDGRID_KEY);
       const msg = {
@@ -106,7 +115,7 @@ const main = async () => {
         from: process.env.SG_FROM_EMAIL,
         // text: fullTextEmail,
         html: fullTextEmail,
-        subject: `Triple Gainers Report! - ${currentDay}`,
+        subject: `Triple Gainers Report! - ${analyzedStocks['date_scraped']}`,
         asm: {
           group_id: +process.env.SENDGRID_UNSUBSCRIBE_GROUP_ID
         }
@@ -118,16 +127,16 @@ const main = async () => {
 
       setTimeout(() => {
         sg.send(msg).then((resp) => {
-          logger.log(`Mail has been sent to ${recipient}!`,
+          logger.info(`Mail has been sent to ${recipient}!`,
             { ...msg, html: '[hidden]' })
 
-          if (i === (sgTgRecipients.length - 1)) {
+          if (i === (sgRecipients.length - 1)) {
             logger.info('\n\nThe notifications have been sent! 🥳\n')
             process.exit(0)
           }
 
         }).catch(err => {
-          logge.log('error sending to recipient ', err)
+          logge.info('error sending to recipient ', err)
         });
 
       }, waitTime)
@@ -140,7 +149,7 @@ const main = async () => {
 
 main().catch(err => {
 
-  logger.log('Error in the tg notifier! ', err)
+  logger.info('Error in the tg notifier! ', err)
 
 })
 
