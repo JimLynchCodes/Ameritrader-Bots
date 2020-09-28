@@ -160,28 +160,28 @@ const buildRowFromMongoData = (analyzedStocks, gainersOrLosers) => {
     .map(gainerObj => {
 
       return `<tr>` +
-        '<td>' +
+        '<td style="min-width:70px">' +
         gainerObj.Symbol +
         '</td>' +
+        // '<td>' +
+        // gainerObj['tg_weighted_change_%'] +
+        // '</td>' +
         '<td>' +
-        gainerObj['tg_weighted_change_%'] +
+        gainerObj['1d_change_%'].slice(0, -2) +
         '</td>' +
         '<td>' +
-        gainerObj['1d_change_%'] +
+        gainerObj['5d_change_%'].slice(0, -2) +
         '</td>' +
         '<td>' +
-        gainerObj['5d_change_%'] +
+        gainerObj['1m_change_%'].slice(0, -2) +
         '</td>' +
-        '<td>' +
-        gainerObj['1m_change_%'] +
+        '<td style="min-width:75px">' +
+        gainerObj['20d_rsi: '].slice(0, -2) +
         '</td>' +
-        '<td>' +
-        gainerObj['20d_rsi: '] +
-        '</td>' +
-        '<td>' +
+        '<td style="min-width:100px">' +
         gainerObj['1D Volm / 20D Volm: '] +
         '</td>' +
-        '<td>' +
+        '<td style="min-width:80px">' +
         gainerObj['BC_Opinion'] +
         '</td>' +
         '</tr>'
@@ -192,12 +192,12 @@ const buildRowFromMongoData = (analyzedStocks, gainersOrLosers) => {
 
 const tableHeaders = () => {
 
-  return '<th><h4>&nbsp;Symbol&nbsp;</h4></th>' +
-    '<th><h4>&nbsp;TG % Change&nbsp;</h4></th>' +
-    '<th><h4>&nbsp;1D % Change&nbsp;</h4></th>' +
-    '<th><h4>&nbsp;5D % Change&nbsp;</h4></th>' +
-    '<th><h4>&nbsp;1M % Change&nbsp;</h4></th>' +
-    '<th><h4>&nbsp;20D RSI&nbsp;</h4></th>' +
-    '<th><h4>&nbsp;1D/20D Volm Ratio&nbsp;</h4></th>' +
-    '<th><h4>&nbsp;BC Opinion&nbsp;</h4></th>'
+  return '<th><h4>Symbol</h4></th>' +
+    // '<th><h4>TG % Change</h4></th>' +
+    '<th><h4>1 Day % Change</h4></th>' +
+    '<th><h4>5 Day % Change</h4></th>' +
+    '<th><h4>30 Day % Change</h4></th>' +
+    '<th><h4>20 Day<br/>RSI %</h4></th>' +
+    '<th><h4>Volume<br/>1 Day / 20 Day</h4></th>' +
+    '<th><h4>Analyst Opinion</h4></th>'
 }

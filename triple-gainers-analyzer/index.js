@@ -28,43 +28,57 @@ const main = async () => {
 
         const tgReport = {}
 
-        stockCategories.forEach(stockCategory => {
+        const volumeRatioMap = {}
 
+        stockCategories.forEach(stockCategory => {
+            
             // Build up tgReport, the final object that gets saved to the db.
             tgReport[stockCategory] = {}
-
+            
             const occurrenceCount = {}
-
+            
             const gOrL = ['gainers', 'losers']
             gOrL.forEach(gainerOrLoserString => {
-
+                
                 tgReport[stockCategory][gainerOrLoserString] = []
-
+                
                 occurrenceCount[gainerOrLoserString] = {}
-
-                let volumes_1d = []
+                let volm_ratio
 
                 scrapedData['categories'][stockCategory][gainerOrLoserString]['today'].forEach(rowOfTodayData => {
 
                     if (occurrenceCount[gainerOrLoserString][rowOfTodayData[0]] === undefined)
-                        occurrenceCount[gainerOrLoserString][rowOfTodayData[0]] = { count: 1 }
+                        occurrenceCount[gainerOrLoserString][rowOfTodayData[0]] = {
+                            count: {
+                                [gainerOrLoserString]: 1
+                            }
+                        }
                     else
-                        occurrenceCount[gainerOrLoserString][rowOfTodayData[0]].count = occurrenceCount[gainerOrLoserString][rowOfTodayData[0]].count + 1
+                        occurrenceCount[gainerOrLoserString][rowOfTodayData[0]].count[gainerOrLoserString] = occurrenceCount[gainerOrLoserString][rowOfTodayData[0]].count[gainerOrLoserString] + 1
 
                     // for "today" on barchart, use the "%Chg" (index 4)
                     occurrenceCount[gainerOrLoserString][rowOfTodayData[0]].gainOrLoss1d = rowOfTodayData[4]
 
-                    // for 1D Volume on barchart, use the "Vol" (index 7)
-                    volumes_1d.push(rowOfTodayData[7])
+                    // calculating volume ratio ("Vol" - index 7, divided by historical 20d vol, index 17)
+                    const volume_1d = parseInt(rowOfTodayData[7].replace(/,/g, ''))
+                    const volume_20d = parseInt(rowOfTodayData[17].replace(/,/g, ''))
+
+                    // logger.info(`comparing ${gainerOrLoserString} ${rowOfTodayData[0]} ${volume_1d} and ${volume_20d}`)
+
+                    volm_ratio = (volume_1d / volume_20d).toFixed(2).toString()
+
+                    volumeRatioMap[rowOfTodayData[0]] = volm_ratio
+
+                    // logger.info(`calculating volm ratio: ${volume_1d} / ${volume_20d} = ${volm_ratio}`)
 
                 })
 
                 scrapedData['categories'][stockCategory][gainerOrLoserString]['5d'].forEach(rowOf5dData => {
 
                     if (occurrenceCount[gainerOrLoserString][rowOf5dData[0]] === undefined)
-                        occurrenceCount[gainerOrLoserString][rowOf5dData[0]] = { count: 1 }
+                        occurrenceCount[gainerOrLoserString][rowOf5dData[0]] = { count: { [gainerOrLoserString]: 1 } }
                     else
-                        occurrenceCount[gainerOrLoserString][rowOf5dData[0]].count = occurrenceCount[gainerOrLoserString][rowOf5dData[0]].count + 1
+                        occurrenceCount[gainerOrLoserString][rowOf5dData[0]].count[gainerOrLoserString] = occurrenceCount[gainerOrLoserString][rowOf5dData[0]].count[gainerOrLoserString] + 1
 
                     // for 5d on barchart, use the "5D %Chg" (index 2)
                     occurrenceCount[gainerOrLoserString][rowOf5dData[0]].gainOrLoss5d = rowOf5dData[2]
@@ -74,14 +88,14 @@ const main = async () => {
                 scrapedData['categories'][stockCategory][gainerOrLoserString]['1m'].forEach((rowOf1mData, rowIndex) => {
 
                     if (occurrenceCount[gainerOrLoserString][rowOf1mData[0]] === undefined)
-                        occurrenceCount[gainerOrLoserString][rowOf1mData[0]] = { count: 1 }
+                        occurrenceCount[gainerOrLoserString][rowOf1mData[0]] = { count: { [gainerOrLoserString]: 1 } }
                     else
-                        occurrenceCount[gainerOrLoserString][rowOf1mData[0]].count = occurrenceCount[gainerOrLoserString][rowOf1mData[0]].count + 1
+                        occurrenceCount[gainerOrLoserString][rowOf1mData[0]].count[gainerOrLoserString] = occurrenceCount[gainerOrLoserString][rowOf1mData[0]].count[gainerOrLoserString] + 1
 
                     // for 1m on barchart, use the "1m %Chg" (index 2)
                     occurrenceCount[gainerOrLoserString][rowOf1mData[0]].gainOrLoss1m = rowOf1mData[2]
 
-                    if (occurrenceCount[gainerOrLoserString][rowOf1mData[0]].count === 3) {
+                    if (occurrenceCount[gainerOrLoserString][rowOf1mData[0]].count[gainerOrLoserString] === 3) {
 
                         const gainOrLoss1dString = occurrenceCount[gainerOrLoserString][rowOf1mData[0]].gainOrLoss1d
                         const gainOrLoss5dString = occurrenceCount[gainerOrLoserString][rowOf1mData[0]].gainOrLoss5d
@@ -93,13 +107,6 @@ const main = async () => {
 
                         // for 20 Day Relative Strength on barchart, use the "20 Day Rel Str" (index 16)
                         const rsi_20d = rowOf1mData[16]
-
-                        // for 20 Day Volume on barchart, use the "20 Day Vol" (index 18)
-                        const volume_20d = rowOf1mData[18]
-
-                        const volm_ratio = (parseInt(volumes_1d[rowIndex]) / parseInt(volume_20d)).toFixed(2)
-
-                        this.logger.info(`calculating volm ratio: ${volumes_1d} / ${volume_20d} = ${volm_ratio}`)
 
                         const weightedChangePercentage = (((
                             3 * gainOrLoss1d * 100 +
@@ -118,7 +125,7 @@ const main = async () => {
                             'tg_weighted_change_%': weightedChangePercentageString,
                             'BC_Opinion': rowOf1mData[15],
                             '20d_rsi: ': rsi_20d,
-                            '1D Volm / 20D Volm: ': volm_ratio
+                            '1D Volm / 20D Volm: ': volumeRatioMap[rowOf1mData[0]]
                         })
 
                         // Use to log the core data object saved to mongo.
@@ -130,7 +137,7 @@ const main = async () => {
 
             })
 
-            this.logger.info(`final occurence count map: \n${JSON.stringify(occurrenceCount, null, 2)}`)
+            // logger.info(`final occurence count map: \n${JSON.stringify(occurrenceCount, null, 2)}`)
 
         })
 
