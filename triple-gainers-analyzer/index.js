@@ -130,6 +130,8 @@ const main = async () => {
 
             })
 
+            this.logger.info(`final occurence count map: \n${JSON.stringify(occurrenceCount, null, 2)}`)
+
         })
 
         const results = await save({
