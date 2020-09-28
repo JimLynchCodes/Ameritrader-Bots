@@ -99,6 +99,8 @@ const main = async () => {
 
                         const volm_ratio = (parseInt(volumes_1d[rowIndex]) / parseInt(volume_20d)).toFixed(2)
 
+                        this.logger.info(`calculating volm ratio: ${volumes_1d} / ${volume_20d} = ${volm_ratio}`)
+
                         const weightedChangePercentage = (((
                             3 * gainOrLoss1d * 100 +
                             2 * gainOrLoss5d * 100 +
