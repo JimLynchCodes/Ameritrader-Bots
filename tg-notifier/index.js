@@ -76,7 +76,7 @@ const main = async () => {
     '</table>' +
 
     '<p>&nbsp;</p>' +
-    `<p>That's all for now!</p><p>If you have any questions, reply to this email, and we'll get back to you soon.</p>` +
+    `<p>That's all for now!</p><p>If you have any questions just reply to this email, and we'll get back to you soon.</p>` +
     '<p>May the gains be with you! 💪</p><br/>' +
     '<p>Disclaimer: any information here may be incorrect. Invest at your own risk!</p>' +
     '<p>Have friends who want to receive the daily Triple Gainers report? <a href="https://cdn.forms-content.sg-form.com/f034a73f-a80f-11ea-8e17-928c85d443c0">Sign up here</a>!</p>' +
