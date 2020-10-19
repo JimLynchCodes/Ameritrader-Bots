@@ -1,6 +1,8 @@
 # Ameritrader Bots
 
-Each folder here represents a different script that does something with the TD Ameritrade api. Each is its own independent little project.
+Each folder here represents a different script that does something related to getting stome stock-relating data, analyzing it, and / or presenting it in some way.
+
+Each folder contains an independent javascript project with its own package.json file and npm scripts.
 
 ## _get-quote_
 
@@ -21,3 +23,8 @@ Uses superfeedr to watch for incoming rss feeds.
 ## _rss-feed-listener_
 
 Uses [rss-feed-emitter](https://github.com/filipedeschamps/rss-feed-emitter) to watch for incoming rss feeds.
+
+
+<br/>
+
+and more...
