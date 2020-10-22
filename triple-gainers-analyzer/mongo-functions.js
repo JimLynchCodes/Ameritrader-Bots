@@ -37,16 +37,18 @@ const save = (documentToSave) => {
             if (err)
                 throw new Error(err)
 
-            console.log('connected to mongo for saving results...')
-
             var dbo = db.db(process.env.DATABASE_NAME)
 
-            dbo.collection(process.env.SECTORS_ANALYSIS_COLLECTION).insertOne(documentToSave,
-                (err, res) => {
-                    if (err) throw err
-                    db.close()
-                    resolve(res.result)
-                })
+            dbo.collection(process.env.SECTORS_ANALYSIS_COLLECTION)
+                .insertOne(documentToSave,
+                    (err, res) => {
+                        if (err) {
+                            console.log('err! ', err)
+                            throw err
+                        }
+                        db.close()
+                        resolve(res.result)
+                    })
 
         })
 

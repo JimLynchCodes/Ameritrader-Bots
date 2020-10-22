@@ -30,18 +30,97 @@ const main = async () => {
 
         const volumeRatioMap = {}
 
+        const gOrL = ['gainers', 'losers']
+        const tips = {
+            gainers: {
+                high_volm_ratio_1d_20d: {
+                    '+4': [],
+                    '+3_5-4': [],
+                    '+3-3_5': [],
+                    '+2_5-3': [],
+                    '+2-2_5': [],
+                    '+1_5-2': []
+                },
+                rel_str_bands: {
+                    '0-10': [],
+                    '10-20': [],
+                    '20-30': [],
+                    '30-40': [],
+                    '40-50': [],
+                    '50-60': [],
+                    '60-70': [],
+                    '70-80': [],
+                    '80-90': [],
+                    '90-100': []
+                },
+                gold_medals: {
+                    '1d': { symbol: '', value: 0 },
+                    '5d': { symbol: '', value: 0 },
+                    '1m': { symbol: '', value: 0 },
+                },
+                silver_medals: {
+                    '1d': { symbol: '', value: 0 },
+                    '5d': { symbol: '', value: 0 },
+                    '1m': { symbol: '', value: 0 }
+                }
+            },
+            losers: {
+                high_volm_ratio_1d_20d: {
+                    '+4': [],
+                    '+3_5-4': [],
+                    '+3-3_5': [],
+                    '+2_5-3': [],
+                    '+2-2_5': [],
+                    '+1_5-2': []
+                },
+                rel_str_bands: {
+                    '0-10': [],
+                    '10-20': [],
+                    '20-30': [],
+                    '30-40': [],
+                    '40-50': [],
+                    '50-60': [],
+                    '60-70': [],
+                    '70-80': [],
+                    '80-90': [],
+                    '90-100': []
+                },
+                gold_medals: {
+                    '1d': { symbol: '', value: 0 },
+                    '5d': { symbol: '', value: 0 },
+                    '1m': { symbol: '', value: 0 }
+                },
+                silver_medals: {
+                    '1d': { symbol: '', value: 0 },
+                    '5d': { symbol: '', value: 0 },
+                    '1m': { symbol: '', value: 0 }
+                }
+            }
+        }
+
+        let numberOfVolumeTipsGainers = 0
+        let numberOfVolumeTipsLosers = 0
+
+        let numberOfRelStrTipsGainers = 0
+        let numberOfRelStrTipsLosers = 0
+
+        let numberOfGoldGainers = 0
+        let numberOfGoldLosers = 0
+
+        let numberOfSilverGainers = 0
+        let numberOfSilverLosers = 0
+
         stockCategories.forEach(stockCategory => {
-            
+
             // Build up tgReport, the final object that gets saved to the db.
             tgReport[stockCategory] = {}
-            
+
             const occurrenceCount = {}
-            
-            const gOrL = ['gainers', 'losers']
+
             gOrL.forEach(gainerOrLoserString => {
-                
+
                 tgReport[stockCategory][gainerOrLoserString] = []
-                
+
                 occurrenceCount[gainerOrLoserString] = {}
                 let volm_ratio
 
@@ -63,13 +142,27 @@ const main = async () => {
                     const volume_1d = parseInt(rowOfTodayData[7].replace(/,/g, ''))
                     const volume_20d = parseInt(rowOfTodayData[17].replace(/,/g, ''))
 
-                    // logger.info(`comparing ${gainerOrLoserString} ${rowOfTodayData[0]} ${volume_1d} and ${volume_20d}`)
-
                     volm_ratio = (volume_1d / volume_20d).toFixed(2).toString()
 
                     volumeRatioMap[rowOfTodayData[0]] = volm_ratio
 
-                    // logger.info(`calculating volm ratio: ${volume_1d} / ${volume_20d} = ${volm_ratio}`)
+                    if (volm_ratio > 4)
+                        tips[gainerOrLoserString].high_volm_ratio_1d_20d['+4'].push({ symbol: rowOfTodayData[0].trim(), value: volm_ratio })
+
+                    else if (volm_ratio > 3.5)
+                        tips[gainerOrLoserString].high_volm_ratio_1d_20d['+3_5-4'].push({ symbol: rowOfTodayData[0].trim(), value: volm_ratio })
+
+                    else if (volm_ratio > 3)
+                        tips[gainerOrLoserString].high_volm_ratio_1d_20d['+3-3_5'].push({ symbol: rowOfTodayData[0].trim(), value: volm_ratio })
+
+                    else if (volm_ratio > 2.5)
+                        tips[gainerOrLoserString].high_volm_ratio_1d_20d['+2_5-3'].push({ symbol: rowOfTodayData[0].trim(), value: volm_ratio })
+
+                    else if (volm_ratio > 2)
+                        tips[gainerOrLoserString].high_volm_ratio_1d_20d['+2-2_5'].push({ symbol: rowOfTodayData[0].trim(), value: volm_ratio })
+
+                    else if (volm_ratio > 1.5)
+                        tips[gainerOrLoserString].high_volm_ratio_1d_20d['+1_5-2'].push({ symbol: rowOfTodayData[0].trim(), value: volm_ratio })
 
                 })
 
@@ -108,6 +201,172 @@ const main = async () => {
                         // for 20 Day Relative Strength on barchart, use the "20 Day Rel Str" (index 16)
                         const rsi_20d = rowOf1mData[16]
 
+                        const rsiInt = parseFloat(rsi_20d.replace(/\+|\%/ig, ''))
+
+                        // calculating Relative Strength tips
+
+                        if (rsiInt > 90)
+                            tips[gainerOrLoserString].rel_str_bands['90-100'].push({ symbol: rowOf1mData[0].trim(), value: rsiInt })
+
+                        else if (rsiInt > 80)
+                            tips[gainerOrLoserString].rel_str_bands['80-90'].push({ symbol: rowOf1mData[0].trim(), value: rsiInt })
+
+                        else if (rsiInt > 70)
+                            tips[gainerOrLoserString].rel_str_bands['70-80'].push({ symbol: rowOf1mData[0].trim(), value: rsiInt })
+
+                        else if (rsiInt > 60)
+                            tips[gainerOrLoserString].rel_str_bands['60-70'].push({ symbol: rowOf1mData[0].trim(), value: rsiInt })
+
+                        else if (rsiInt > 50)
+                            tips[gainerOrLoserString].rel_str_bands['50-60'].push({ symbol: rowOf1mData[0].trim(), value: rsiInt })
+
+                        else if (rsiInt > 40)
+                            tips[gainerOrLoserString].rel_str_bands['40-50'].push({ symbol: rowOf1mData[0].trim(), value: rsiInt })
+
+                        else if (rsiInt > 30)
+                            tips[gainerOrLoserString].rel_str_bands['30-40'].push({ symbol: rowOf1mData[0].trim(), value: rsiInt })
+
+                        else if (rsiInt > 20)
+                            tips[gainerOrLoserString].rel_str_bands['20-30'].push({ symbol: rowOf1mData[0].trim(), value: rsiInt })
+
+                        else if (rsiInt > 10)
+                            tips[gainerOrLoserString].rel_str_bands['10-20'].push({ symbol: rowOf1mData[0].trim(), value: rsiInt })
+
+                        else
+                            tips[gainerOrLoserString].rel_str_bands['0-10'].push({ symbol: rowOf1mData[0].trim(), value: rsiInt })
+
+
+                        // calculating "Gold Medals (gainers)" tips
+                        if (gainOrLoss1d > tips.gainers.gold_medals['1d'].value) {
+
+                            if (tips.gainers.gold_medals['1d']) {
+                                tips.gainers.silver_medals['1d'] = {
+                                    symbol: tips.gainers.gold_medals['1d'].symbol,
+                                    value: tips.gainers.gold_medals['1d'].value,
+                                }
+
+                            }
+
+                            tips.gainers.gold_medals['1d'] = {
+                                symbol: rowOf1mData[0].trim(),
+                                value: gainOrLoss1d
+                            }
+                        } else if (gainOrLoss1d > tips.gainers.silver_medals['1d'].value) {
+                            tips.gainers.silver_medals['1d'] = {
+                                symbol: rowOf1mData[0].trim(),
+                                value: gainOrLoss1d
+                            }
+                        }
+
+                        if (gainOrLoss5d > tips.gainers.gold_medals['5d'].value) {
+
+                            if (tips.gainers.gold_medals['5d']) {
+                                tips.gainers.silver_medals['5d'] = {
+                                    symbol: tips.gainers.gold_medals['5d'].symbol,
+                                    value: tips.gainers.gold_medals['5d'].value,
+                                }
+                            }
+
+                            tips.gainers.gold_medals['5d'] = {
+                                symbol: rowOf1mData[0].trim(),
+                                value: gainOrLoss5d,
+                            }
+
+                        } else if (gainOrLoss5d > tips.gainers.silver_medals['5d'].value) {
+                            tips.gainers.silver_medals['5d'] = {
+                                symbol: rowOf1mData[0].trim(),
+                                value: gainOrLoss5d
+                            }
+                        }
+
+                        if (gainOrLoss1m > tips.gainers.gold_medals['1m'].value) {
+
+                            if (tips.gainers.gold_medals['1m']) {
+                                tips.gainers.silver_medals['1m'] = {
+                                    symbol: tips.gainers.gold_medals['1m'].symbol,
+                                    value: tips.gainers.gold_medals['1m'].value,
+                                }
+                            }
+
+                            tips.gainers.gold_medals['1m'] = {
+                                symbol: rowOf1mData[0].trim(),
+                                value: gainOrLoss1m,
+                            }
+                        } else if (gainOrLoss1m > tips.gainers.silver_medals['1m'].value) {
+                            tips.gainers.silver_medals['1m'] = {
+                                symbol: rowOf1mData[0].trim(),
+                                value: gainOrLoss1m
+                            }
+                        }
+
+                        // calculating "Gold Medals (losers)" tips
+
+                        if (gainOrLoss1d < tips.losers.gold_medals['1d'].value) {
+
+                            if (tips.losers.gold_medals['1d']) {
+                                tips.losers.silver_medals['1d'] = {
+                                    symbol: tips.losers.gold_medals['1d'].symbol,
+                                    value: tips.losers.gold_medals['1d'].value,
+                                }
+                            }
+
+                            tips.losers.gold_medals['1d'] = {
+                                symbol: rowOf1mData[0].trim(),
+                                value: gainOrLoss1d,
+                            }
+                        } else if (gainOrLoss1d < tips.losers.silver_medals['1d'].value) {
+                            tips.losers.silver_medals['1d'] = {
+                                symbol: rowOf1mData[0].trim(),
+                                value: gainOrLoss1d
+                            }
+                        }
+
+                        if (gainOrLoss5d < tips.losers.gold_medals['5d'].value) {
+
+                            if (tips.losers.gold_medals['5d']) {
+                                tips.losers.silver_medals['5d'] = {
+                                    symbol: tips.losers.gold_medals['5d'].symbol,
+                                    value: tips.losers.gold_medals['5d'].value,
+                                }
+                            }
+
+                            tips.losers.gold_medals['5d'] = {
+                                symbol: rowOf1mData[0].trim(),
+                                value: gainOrLoss5d
+                            }
+                        } else if (gainOrLoss5d < tips.losers.silver_medals['5d'].value) {
+                            tips.losers.silver_medals['5d'] = {
+                                symbol: rowOf1mData[0].trim(),
+                                value: gainOrLoss5d
+                            }
+                        }
+
+                        if (gainOrLoss1m < tips.losers.gold_medals['1m'].value) {
+
+                            if (tips.losers.gold_medals['1m']) {
+                                tips.losers.silver_medals['1m'] = {
+                                    symbol: tips.losers.gold_medals['1m'].symbol,
+                                    value: tips.losers.gold_medals['1m'].value,
+                                }
+                            }
+
+                            tips.losers.gold_medals['1m'] = {
+                                symbol: rowOf1mData[0].trim(),
+                                value: gainOrLoss1m
+                            }
+                        } else if (gainOrLoss1m < tips.losers.silver_medals['1m'].value) {
+                            tips.losers.silver_medals['1m'] = {
+                                symbol: rowOf1mData[0].trim(),
+                                value: gainOrLoss1m
+                            }
+                        }
+
+                        numberOfVolumeTipsGainers = Object.values(tips.gainers.high_volm_ratio_1d_20d).reduce((acc, array) => acc + array.length, 0)
+                        numberOfVolumeTipsLosers = Object.values(tips.losers.high_volm_ratio_1d_20d).reduce((acc, array) => acc + array.length, 0)
+
+                        numberOfRelStrTipsGainers = Object.values(tips.gainers.rel_str_bands).reduce((acc, array) => acc + array.length, 0)
+                        numberOfRelStrTipsLosers = Object.values(tips.losers.rel_str_bands).reduce((acc, array) => acc + array.length, 0)
+
                         const weightedChangePercentage = (((
                             3 * gainOrLoss1d * 100 +
                             2 * gainOrLoss5d * 100 +
@@ -127,25 +386,44 @@ const main = async () => {
                             '20d_rsi: ': rsi_20d,
                             '1D Volm / 20D Volm: ': volumeRatioMap[rowOf1mData[0]]
                         })
-
-                        // Use to log the core data object saved to mongo.
-                        // logger.info(`final tgReport:  ${JSON.stringify(tgReport, null, 2)}`)
-
                     }
-
                 })
-
             })
-
-            // logger.info(`final occurence count map: \n${JSON.stringify(occurrenceCount, null, 2)}`)
-
         })
 
         const results = await save({
             'date_scraped': currentDay,
             'time_scraped': currentTime,
-            results: tgReport
+            results: tgReport,
+            tips
         })
+
+        numberOfGoldGainers = +(tips.gainers.gold_medals['1d'].value !== 0 ? 1 : 0) +
+            +(tips.gainers.gold_medals['5d'].value !== 0 ? 1 : 0) +
+            +(tips.gainers.gold_medals['1m'].value !== 0 ? 1 : 0)
+
+        numberOfGoldLosers = +(tips.losers.gold_medals['1d'].value !== 0 ? 1 : 0) +
+            +(tips.losers.gold_medals['5d'].value !== 0 ? 1 : 0) +
+            +(tips.losers.gold_medals['1m'].value !== 0 ? 1 : 0)
+
+        numberOfSilverGainers = +(tips.gainers.silver_medals['1d'].value !== 0 ? 1 : 0) +
+            +(tips.gainers.silver_medals['5d'].value !== 0 ? 1 : 0) +
+            +(tips.gainers.silver_medals['1m'].value !== 0 ? 1 : 0)
+
+        numberOfSilverLosers = +(tips.losers.silver_medals['1d'].value !== 0 ? 1 : 0) +
+            +(tips.losers.silver_medals['5d'].value !== 0 ? 1 : 0) +
+            +(tips.losers.silver_medals['1m'].value !== 0 ? 1 : 0)
+
+        logger.info(`Created tips:\ngainers:` +
+            `volm: (${numberOfVolumeTipsGainers}), ` +
+            `rel str: (${numberOfRelStrTipsGainers}), ` +
+            `golds: (${numberOfGoldGainers}), ` +
+            `silvers: (${numberOfSilverGainers}), ` +
+            `\nlosers, ` +
+            `volm: (${numberOfVolumeTipsLosers}), ` +
+            `rel str:: (${numberOfRelStrTipsLosers}), ` +
+            `golds: (${numberOfGoldLosers}), ` +
+            `silvers: (${numberOfSilverLosers}), `)
 
         const numberOfGainers = tgReport['large_cap_us'].gainers.length
         const numberOfLosers = tgReport['large_cap_us'].losers.length
@@ -153,7 +431,6 @@ const main = async () => {
         logger.info(`\n\nLarge Cap: Found ${numberOfGainers} Gainers and ${numberOfLosers} Losers!\n\nSaved tg analysis to mongo! 🤓\n`)
 
         resolve(null)
-
     })
 }
 

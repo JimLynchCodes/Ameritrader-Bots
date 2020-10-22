@@ -208,7 +208,7 @@ const tableHeaders = () => {
     '<th><h4>1 Day % Change</h4></th>' +
     '<th><h4>5 Day % Change</h4></th>' +
     '<th><h4>30 Day % Change</h4></th>' +
-    '<th><h4>20 Day<br/>RSI %</h4></th>' +
+    '<th><h4>20 Day<br/>Relative<br/>Strength</h4></th>' +
     '<th><h4>Volume<br/>1 Day / 20 Day</h4></th>' +
     '<th><h4>Analyst Opinion</h4></th>'
 }
