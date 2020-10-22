@@ -110,6 +110,7 @@ const main = async () => {
         let numberOfSilverGainers = 0
         let numberOfSilverLosers = 0
 
+
         stockCategories.forEach(stockCategory => {
 
             // Build up tgReport, the final object that gets saved to the db.
@@ -198,6 +199,9 @@ const main = async () => {
                         const gainOrLoss5d = parseFloat(occurrenceCount[gainerOrLoserString][rowOf1mData[0]].gainOrLoss5d.replace(/\+|\%/ig, ''))
                         const gainOrLoss1m = parseFloat(occurrenceCount[gainerOrLoserString][rowOf1mData[0]].gainOrLoss1m.replace(/\+|\%/ig, ''))
 
+
+
+
                         // for 20 Day Relative Strength on barchart, use the "20 Day Rel Str" (index 16)
                         const rsi_20d = rowOf1mData[16]
 
@@ -236,7 +240,7 @@ const main = async () => {
                             tips[gainerOrLoserString].rel_str_bands['0-10'].push({ symbol: rowOf1mData[0].trim(), value: rsiInt })
 
 
-                        // calculating "Gold Medals (gainers)" tips
+                        // calculating "Gold Medals (gainers)" tips 1d
                         if (gainOrLoss1d > tips.gainers.gold_medals['1d'].value) {
 
                             if (tips.gainers.gold_medals['1d']) {
@@ -391,7 +395,7 @@ const main = async () => {
             })
         })
 
-        const results = await save({
+        await save({
             'date_scraped': currentDay,
             'time_scraped': currentTime,
             results: tgReport,
