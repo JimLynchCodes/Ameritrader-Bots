@@ -51,7 +51,7 @@ const main = async () => {
 
   logger.info(`Notifying of ${numberOfGainers} gainers and ${numberOfLosers} losers.`)
 
-    const highVolumeTipsSection = `<h2>Unusually High Volume 🥇</h2>` +
+  const highVolumeTipsSection = `<h2>Unusually High Volume ✨</h2>` +
     '<p><i>Stocks with the highest 1 day / 20 day volume ratio.</i></p>' +
     '<h3>Gainers</h3>' +
     '<div style="background:rgb(255,255,255);max-width:600px;width:100%;margin:0px auto; text-align: center;">' +
@@ -62,7 +62,7 @@ const main = async () => {
     '</tr>' +
 
     getVolumeTipsRows(analyzedStocks.tips['gainers']['high_volm_ratio_1d_20d']) +
-    
+
     '</table>' +
     '<br/>' +
     '</div>' +
@@ -78,23 +78,25 @@ const main = async () => {
 
     '</table>' +
     '<br/>' +
-    '</div>'
+    '</div>' +
+    '<br/>' +
+    '<hr/>'
 
 
-    const relativeStrengthTipsSection = `<h2>Bouncin' Back</h2>` +
-    '<p><i>Go long stocks that have a low relative strength (oversold),</i></p>' +
-    '<p><i>and go short stocks that have a high relative strength (overbought).</i></p>' +
+  const relativeStrengthTipsSection = `<h2>Bouncin' Back 🏀</h2>` +
+    '<p><i>In general, stocks with a low relative strength are oversold (go long),</i></p>' +
+    '<p><i>and stocks with a high relative strength are overbought (go short).</i></p>' +
     '<h3>Oversold</h3>' +
     '<div style="background:rgb(255,255,255);max-width:600px;width:100%;margin:0px auto; text-align: center;">' +
     '<table border="1" cellspacing="0" padding="5" style="border: 1px solid black; margin: auto;min-width:300px;">' +
-    
+
     '<tr>' +
     '<th style="min-width:70px;"><h4>Symbol</h4></th>' +
     '<th><h4>Relative Strength</h4></th>' +
     '</tr>' +
 
     getLowRelStrTipsRows(analyzedStocks.tips['gainers']['rel_str_bands'], analyzedStocks.tips['losers']['rel_str_bands']) +
-    
+
     '</table>' +
     '<br/>' +
     '</div>' +
@@ -105,12 +107,14 @@ const main = async () => {
     '<th style="min-width:70px;"><h4>Symbol</h4></th>' +
     '<th><h4>Relative Strength</h4></th>' +
     '</tr>' +
-    
+
     getHighRelStrTipsRows(analyzedStocks.tips['gainers']['rel_str_bands'], analyzedStocks.tips['losers']['rel_str_bands']) +
 
     '</table>' +
     '<br/>' +
-    '</div>'
+    '</div>' +
+    '<br/>' +
+    '<hr/>'
 
 
 
@@ -167,7 +171,8 @@ const main = async () => {
     '</tr>' +
     '</table>' +
     '<br/>' +
-    '</div>'
+    '<br/>' +
+    '<hr/>'
 
   const silverMedalsSection = '<h2>Silver Medals 🥈</h2>' +
     '<p><i>The second largest moves for each direction and time period.</i></p>' +
@@ -222,16 +227,20 @@ const main = async () => {
     '</tr>' +
     '</table>' +
     '<br/>' +
-    '</div>'
+    '</div>' +
+    '<br/>' +
+    '<hr/>'
 
   const emailHeader = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">` +
     '<div style="background:rgb(255,255,255);max-width:600px;width:100%;margin:0px auto; text-align: center;">' +
     '<br/>' +
     '<h1>Triple Gainers</h1>' +
     '<p>The highest percentage changed stocks for the past day, week, and month.</p>' +
-    '<hr/>' +
     '<br/>' +
-    `Hey there! Here's the Triple Gainers report for large cap US stocks after market close on ${analyzedStocks['date_scraped']}!\n🤖` +
+    `This is the report for <i><b>Large Cap US stocks,</b></i> calculated after market close on ${analyzedStocks['date_scraped']}.` +
+    '<br/>' +
+    '<br/>' +
+    '🤖' +
     '<br/>' +
     '<br/>' +
     '<hr/>' +
@@ -239,20 +248,17 @@ const main = async () => {
 
   const tipsSection = highVolumeTipsSection + relativeStrengthTipsSection + goldMedalsSection + silverMedalsSection
 
-  const gainersTable = '<h2>All Triple Gainers & Losers Data</h2>' +
-    '<br/>' +
+  const gainersTable = '<br/><h2>All Triple Gainers & Losers Data</h2>' +
     '<h3>Gainers:</h3>' +
     '<table border="1" cellspacing="0" padding="5" style="border: 1px solid black;">' +
     '<tr>' +
     tableHeaders() +
     '</tr>' +
     largeCapGainersTableRows +
-    '</table>' + 
-    '<br/>' +
-    '<hr/>'
-    
-    
-    const losersTable = '<h3>Losers:</h3>\n' +
+    '</table>' +
+    '<br/>'
+
+  const losersTable = '<h3>Losers:</h3>\n' +
     '<table border="1" cellspacing="0" padding="5" style="border: 1px solid black;">' +
     '<tr>' +
     tableHeaders() +
@@ -260,9 +266,10 @@ const main = async () => {
     largeCapLosersTableRows +
     '</table>' +
     '<br/>' +
-    '<hr/>'
+    '<br/>' +
+    '<br/>'
 
-  const emailFooter = '<p>&nbsp;</p>' +
+  const emailFooter = '</<p>&nbsp;</p>' +
     `<p>That's all for now!</p><p>If you have any questions just reply to this email, and we'll get back to you soon.</p>` +
     '<p>May the gains be with you! 💪</p><br/>' +
     '<p>Disclaimer: any information here may be incorrect. Invest at your own risk!</p>' +
@@ -302,7 +309,7 @@ const main = async () => {
         from: process.env.SG_FROM_EMAIL,
         // text: fullTextEmail,
         html: fullTextEmail,
-        subject: `Triple Gainers Report!7 - ${analyzedStocks['date_scraped']}`,
+        subject: `Triple Gainers Report! - ${analyzedStocks['date_scraped']}`,
         asm: {
           group_id: +process.env.SENDGRID_UNSUBSCRIBE_GROUP_ID
         }
@@ -396,8 +403,8 @@ const getLowRelStrTipsRows = (gainersRelStrBands, losersRelStrBands) => {
     ...losersRelStrBands['20-30'],
     ...losersRelStrBands['30-40'],
   ]
-  .sort((a, b) => +(a.value) - +(b.value))
-  
+    .sort((a, b) => +(a.value) - +(b.value))
+
   return lowRelStrTips.map((tip, index) => {
 
     const tr = (index % 2 === 1) ? '<tr>' : `<tr bgcolor='#B9EDB9'>`
@@ -422,7 +429,7 @@ const getHighRelStrTipsRows = (gainersRelStrBands, losersRelStrBands) => {
     ...losersRelStrBands['70-80'],
     ...losersRelStrBands['60-70'],
   ]
-  .sort((a, b) => +(b.value) - +(a.value))
+    .sort((a, b) => +(b.value) - +(a.value))
 
   return highRelStrTips.map((tip, index) => {
 
@@ -449,7 +456,7 @@ const tableHeaders = () => {
 }
 
 const getVolumeTipsRows = (volmRatiosObj) => {
-  
+
   const volumeTips = [
     ...volmRatiosObj['+4'],
     ...volmRatiosObj['+3_5-4'],
@@ -457,7 +464,7 @@ const getVolumeTipsRows = (volmRatiosObj) => {
     ...volmRatiosObj['+2_5-3'],
     ...volmRatiosObj['+2-2_5']
   ]
-  .sort((a, b) => +(b.value) - +(a.value))
+    .sort((a, b) => +(b.value) - +(a.value))
 
   return volumeTips.map((tip, index) => {
 
